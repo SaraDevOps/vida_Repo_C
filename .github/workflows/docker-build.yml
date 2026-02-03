@@ -1,0 +1,40 @@
+name: Docker Build & Push (Lambda)
+
+on:
+  workflow_call:
+    outputs:
+      image_uri:
+        description: "Pushed ECR image URI"
+        value: ${{ jobs.build.outputs.image_uri }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    outputs:
+      image_uri: ${{ steps.image.outputs.image_uri }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::767828738042:role/GitHub-Actions-Role
+          aws-region: us-east-1
+
+      - uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push Lambda Image
+        id: image
+        run: |
+          IMAGE_TAG=${GITHUB_SHA}
+          IMAGE_URI=767828738042.dkr.ecr.us-east-1.amazonaws.com/sample-service:${IMAGE_TAG}
+
+          docker build -t $IMAGE_URI docker_build/sample-service
+          docker push $IMAGE_URI
+
+          echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
