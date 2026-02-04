@@ -1,4 +1,4 @@
-name: Docker Build and Push
+name: Docker Build & Push
 
 on:
   workflow_call:
@@ -10,26 +10,33 @@ on:
         required: true
         type: string
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-  docker:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ inputs.role_arn }}
           aws-region: us-east-1
 
-      - name: Login to ECR
+      - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and Push Docker Image
+      - name: Build Docker image
         run: |
-          docker build -t ${{ inputs.ecr_repo }}:latest docker_build/sample-service
+          docker build \
+            -t ${{ inputs.ecr_repo }}:latest \
+            docker_build/sample-service
+
+      - name: Push Docker image
+        run: |
           docker push ${{ inputs.ecr_repo }}:latest
