@@ -21,19 +21,28 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ inputs.role_arn }}
           aws-region: us-east-1
 
-      - uses: actions/download-artifact@v4
+      - name: Download Plan Artifact
+        uses: actions/download-artifact@v4
         with:
           name: tfplan
 
-      - run: terraform init
-      - run: terraform workspace select ${{ inputs.env }}
+      - name: Terraform Init
+        run: terraform init
 
-      - run: terraform apply -auto-approve tfplan
+      - name: Select Workspace
+        run: terraform workspace select ${{ inputs.env }}
+
+      - name: Terraform Apply (Reuse Plan)
+        run: terraform apply tfplan

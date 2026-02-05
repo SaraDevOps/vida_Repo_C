@@ -35,8 +35,10 @@ jobs:
         run: |
           docker build \
             -t ${{ inputs.ecr_repo }}:latest \
+            -t ${{ inputs.ecr_repo }}:${{ github.sha }} \
             docker_build/sample-service
 
       - name: Push Docker image
         run: |
           docker push ${{ inputs.ecr_repo }}:latest
+          docker push ${{ inputs.ecr_repo }}:${{ github.sha }}
