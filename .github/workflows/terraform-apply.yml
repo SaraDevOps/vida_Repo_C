@@ -43,8 +43,7 @@ jobs:
 
       - name: Select Workspace
         run: |
-          terraform workspace select ${{ inputs.env }} \
-          || terraform workspace new ${{ inputs.env }}
+          run: terraform workspace select -or-create ${{ inputs.env }}
 
 
       - name: Terraform Apply (Reuse Plan)
