@@ -6,9 +6,6 @@ on:
       env:
         required: true
         type: string
-      tfvars:
-        required: true
-        type: string
       role_arn:
         required: true
         type: string
@@ -32,8 +29,8 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: tfplan
+          name: tfplan-${{ inputs.env }}
 
       - run: terraform init
       - run: terraform workspace select -or-create ${{ inputs.env }}
-      - run: terraform apply tfplan
+      - run: terraform apply tfplan-${{ inputs.env }}
