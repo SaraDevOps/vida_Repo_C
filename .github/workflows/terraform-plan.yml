@@ -16,13 +16,13 @@ on:
 jobs:
   plan:
     runs-on: ubuntu-latest
-
     permissions:
       id-token: write
       contents: read
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: hashicorp/setup-terraform@v3
 
       - uses: aws-actions/configure-aws-credentials@v4
@@ -31,13 +31,12 @@ jobs:
           aws-region: us-east-1
 
       - run: terraform init
+
       - run: terraform workspace select -or-create ${{ inputs.env }}
 
-      - name: Terraform Plan
-        run: terraform plan -var-file=${{ inputs.tfvars }} -out=tfplan-${{ inputs.env }}
+      - run: terraform plan -var-file=${{ inputs.tfvars }} -out=tfplan-${{ inputs.env }}
 
-      - name: Upload Plan Artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: tfplan-${{ inputs.env }}
           path: tfplan-${{ inputs.env }}

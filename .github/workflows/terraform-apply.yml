@@ -6,6 +6,9 @@ on:
       env:
         required: true
         type: string
+      tfvars:
+        required: true
+        type: string
       role_arn:
         required: true
         type: string
@@ -13,13 +16,13 @@ on:
 jobs:
   apply:
     runs-on: ubuntu-latest
-
     permissions:
       id-token: write
       contents: read
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: hashicorp/setup-terraform@v3
 
       - uses: aws-actions/configure-aws-credentials@v4
@@ -32,5 +35,7 @@ jobs:
           name: tfplan-${{ inputs.env }}
 
       - run: terraform init
+
       - run: terraform workspace select -or-create ${{ inputs.env }}
+
       - run: terraform apply tfplan-${{ inputs.env }}
